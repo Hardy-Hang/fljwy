@@ -1,0 +1,24 @@
+<appender name="ROLLINGFILE-Exception" class="ch.qos.logback.classic.sift.SiftingAppender">
+	<discriminator>
+		<Key>method</Key>
+		<DefaultValue>Exception</DefaultValue>
+	</discriminator>
+	<sift>
+		<appender name="Exception"
+			class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+				<fileNamePattern>${LOG_HOME}/${method}/%d{yyyy-MM-dd}-commonException.log
+				</fileNamePattern>
+				<maxHistory>15</maxHistory>
+			</rollingPolicy>
+			<triggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+				<MaxFileSize>10MB</MaxFileSize>
+			</triggeringPolicy>
+			<encoder>
+				<pattern><![CDATA[[%-5level]%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n]]></pattern>
+			</encoder>
+		</appender>
+
+	</sift>
+</appender>

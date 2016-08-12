@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+    http://mybatis.org/schema/mybatis-spring
+  	http://mybatis.org/schema/mybatis-spring.xsd
+ 	http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+  	http://www.springframework.org/schema/aop  
+    http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+    http://www.springframework.org/schema/tx  
+    http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+    http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-4.1.xsd
+	http://www.springframework.org/schema/task
+    http://www.springframework.org/schema/task/spring-task-4.1.xsd
+    http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<jaxws:client id="cxfClient" serviceClass="cn.com.webxml.EnglishChineseSoap"
+		address="http://fy.webxml.com.cn/webservices/EnglishChinese.asmx" />
+	<!--引入配置属性文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+
+	<!--自动扫描含有@Service将其注入为bean -->
+	<context:component-scan base-package="com.hiynn.fl.jingwuyun.service" />
+
+
+	<!-- 配置数据源 使用的是c3p0数据源 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${datasource.driverClass}" />
+		<property name="jdbcUrl" value="${datasource.jdbcUrl}" />
+		<property name="user" value="${datasource.user}" />
+		<property name="password" value="${datasource.password}" />
+		<property name="minPoolSize" value="${datasource.minPoolSize}" />
+		<property name="maxPoolSize" value="${datasource.maxPoolSize}" />
+		<property name="initialPoolSize" value="${datasource.initialPoolSize}" />
+		<property name="maxIdleTime" value="${datasource.maxIdleTime}" />
+		<property name="acquireIncrement" value="${datasource.acquireIncrement}" />
+		<property name="maxStatements" value="${datasource.maxStatements}" />
+		<property name="idleConnectionTestPeriod" value="${datasource.idleConnectionTestPeriod}" />
+		<property name="acquireRetryAttempts" value="${datasource.acquireRetryAttempts}" />
+		<property name="breakAfterAcquireFailure" value="${datasource.breakAfterAcquireFailure}" />
+		<property name="testConnectionOnCheckout" value="${datasource.testConnectionOnCheckout}" />
+	</bean>
+
+
+	<bean name="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- 通过aop定义事务增强切面 及性能统计 -->
+	<aop:config>
+		<!--配置事务切入点 把事务控制在Service层 -->
+		<aop:pointcut id="serviceMethod"
+			expression="execution( * com.hiynn.fl.jingwuyun.service.*.*(..))" />
+		<aop:pointcut id="appServiceMethods"
+			expression="execution(* com.hiynn.fl.jingwuyun.service.*.*(..))" />
+		<aop:pointcut id="appDaoMethods"
+			expression="execution(* com.hiynn.fl.jingwuyun.dao.*.*(..))" />
+		<aop:advisor pointcut-ref="appServiceMethods" advice-ref="appAroundMethodAdvisorService" />
+		<aop:advisor pointcut-ref="appDaoMethods" advice-ref="appAroundMethodAdvisorDao" />
+		<!--配置事务通知 -->
+		<aop:advisor pointcut-ref="serviceMethod" advice-ref="txAdvice" />
+		<!--对controller配置日志AOP -->
+		<aop:aspect ref="SystemLogAspect">
+			<!-- 1、pointcut="@annotation(com.hiynn.fl.jingwuyun.util.SystemControllerLog)" 
+				表示切入点是注解 2、method 指向的方法，是切面类中的方法，表示当程序触发pointcut指向的注解时，aop会启动method方法 -->
+			<aop:before method="doBefore"
+				pointcut="@annotation(com.hiynn.fl.jingwuyun.util.SystemControllerLog)" />
+			<aop:after-throwing method="doAfterThrowing"
+				pointcut="@annotation(com.hiynn.fl.jingwuyun.util.SystemControllerLog)"
+				throwing="e" />
+			<!-- <aop:after method="doAfterThrowing" pointcut="@annotation(com.hiynn.fl.jingwuyun.util.SystemControllerLog)"/> -->
+			<aop:after method="doAfter"
+				pointcut="@annotation(com.hiynn.fl.jingwuyun.util.SystemControllerLog)"></aop:after>
+		</aop:aspect>
+	</aop:config>
+
+	<bean id="appAroundMethodAdvisorService" class="com.hiynn.fl.jingwuyun.util.HiynnAdvisor">
+		<property name="serviceLogFlag" value="true" />
+	</bean>
+	<bean id="appAroundMethodAdvisorDao" class="com.hiynn.fl.jingwuyun.util.HiynnAdvisor">
+		<property name="daoLogFlag" value="true" />
+	</bean>
+	<bean id="SystemLogAspect" class="com.hiynn.fl.jingwuyun.util.SystemLogAspect"></bean>
+
+	<!-- 为事务通知添加事物处理特性 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="delete*" propagation="REQUIRED"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="insert*" propagation="REQUIRED"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="update*" propagation="REQUIRED"
+				rollback-for="java.lang.Exception" />
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- ======================mybatis相关配置===================== -->
+	<!-- mybatis文件配置，扫描所有mapper文件 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"
+		p:dataSource-ref="dataSource" p:mapperLocations="classpath:mappers/*.xml" />
+
+	<!-- spring与mybatis整合配置，扫描所有dao -->
+	<!-- 扫描接口 -->
+	<mybatis:scan base-package="com.hiynn.fl.jingwuyun.dao"></mybatis:scan>
+
+
+	<!-- 使用ehcache缓存 -->
+	<bean id="ehCacheManager"
+		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:ehcache.xml" />
+		<!-- <property name="cacheManagerName" value="baseCache" /> -->
+		<property name="shared" value="true" />
+	</bean>
+
+	<!-- 支持缓存注解 -->
+	<cache:annotation-driven cache-manager="cacheManager" />
+
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+		<property name="cacheManager" ref="ehCacheManager" />
+	</bean>
+
+</beans>           

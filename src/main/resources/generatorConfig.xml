@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+	<properties resource="jdbc.properties" />
+	<classPathEntry
+		location="C:\Users\admin\.m2\repository\mysql\mysql-connector-java\5.1.6\mysql-connector-java-5.1.6.jar" />
+	<context id="fl" targetRuntime="MyBatis3">
+		<property name="beginningDelimiter" value="`" />
+		<property name="endingDelimiter" value="`" />
+		<commentGenerator>
+			<!-- 是否去除自动生成的注释 true：是 ： false:否 -->
+			<property name="suppressAllComments" value="true" />
+			<!--数据库连接的信息：驱动类、连接地址、用户名、密码 -->
+		</commentGenerator>
+		<jdbcConnection driverClass="${datasource.driverClass}"
+			connectionURL="${datasource.jdbcUrl}" userId="${datasource.user}"
+			password="${datasource.password}">
+		</jdbcConnection>
+		<javaModelGenerator targetPackage="com.hiynn.fl.jingwuyun.entity"
+			targetProject="./src/main/java/">
+			<property name="enableSubPackages" value="true" />
+			<!-- 从数据库返回的值被清理前后的空格 -->
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+
+		<sqlMapGenerator targetPackage="mappers"
+			targetProject="./src/main/resources/">
+			<property name="enableSubPackages" value="false" />
+		</sqlMapGenerator>
+
+		<javaClientGenerator targetPackage="com.hiynn.fl.jingwuyun.dao"
+			targetProject="./src/main/java/" type="XMLMAPPER">
+			<property name="enableSubPackages" value="false" />
+		</javaClientGenerator>
+
+		<table tableName="generator" domainObjectName="Generator"></table>
+	</context>
+</generatorConfiguration>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+	<contextName>logback</contextName>
+
+	<property name="LOG_HOME" value="D:/logs-fljingwuyun" />
+	<!-- <property name="LOG_HOME" value="/home/logs-fljingwuyun"/> -->
+	<!-- 控制台输出 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+
+		<!-- encoder默认配置为PartternLayoutEncoder -->
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>[%-5level]%d{yyyy-MM-dd HH:mm:ss.SSS} %logger - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<include resource="logConf/logback-Error.xml" />
+	<include resource="logConf/logback-Info.xml" />
+	<include resource="logConf/logback-Debug.xml" />
+	<include resource="logConf/logback-Exception.xml" />
+
+	<logger name="org.apache.cxf" level="WARN" />
+	<logger name="com.hiynn.fl.jingwuyun.util.ExceptionUtil"
+		additivity="false">
+		<appender-ref ref="ROLLINGFILE-Exception" />
+	</logger>
+	<root>
+		<level value="info" />
+		<appender-ref ref="ROLLINGFILE-Error" />
+		<appender-ref ref="ROLLINGFILE-Info" />
+		<appender-ref ref="ROLLINGFILE-Debug" />
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>
