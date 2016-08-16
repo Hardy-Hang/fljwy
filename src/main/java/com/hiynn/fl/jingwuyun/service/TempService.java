@@ -11,7 +11,6 @@ import cn.com.webxml.EnglishChineseSoap;
 import com.hiynn.fl.jingwuyun.dao.TempMapper;
 import com.hiynn.fl.jingwuyun.entity.TempEntity;
 import com.hiynn.fl.jingwuyun.util.CommonException;
-import com.hiynn.fl.jingwuyun.util.ExceptionUtil;
 
 /**
  * <p>Title: TempService </p>
@@ -56,12 +55,12 @@ public class TempService {
 	public void insertAll(TempEntity te) throws CommonException {
 
 		tempMapper.insertAll(te);
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		ExceptionUtil.throwCommonException("测试事务");
+//		try {
+//			Thread.sleep(2000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//		ExceptionUtil.throwCommonException("测试事务");
 	}
 
 	/** 

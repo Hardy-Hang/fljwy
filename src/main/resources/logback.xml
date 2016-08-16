@@ -21,7 +21,7 @@
 
 	<logger name="org.apache.cxf" level="WARN" />
 	<logger name="com.hiynn.fl.jingwuyun.util.ExceptionUtil"
-		additivity="false">
+		additivity="true">
 		<appender-ref ref="ROLLINGFILE-Exception" />
 	</logger>
 	<root>

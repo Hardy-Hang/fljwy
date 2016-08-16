@@ -30,13 +30,35 @@ public class SearchController {
 	@Autowired
 	private LuceneSearchService luceneSearchService;
 
-	@RequestMapping(value = "search/{key}", method = RequestMethod.GET)
+	@RequestMapping(value = "searchindustry/{key}", method = RequestMethod.GET)
 	public @ResponseBody
-	List<Map<String, String>> getAxis(@PathVariable("key") String key) throws Exception {
+	List<Map<String, String>> searchIndustry(@PathVariable("key") String key) throws Exception {
 
 		key = new String(key.getBytes("ISO-8859-1"), "UTF-8");
 
-		List<Map<String, String>> searResults = luceneSearchService.getSearchResults(key);
+		List<Map<String, String>> searResults = luceneSearchService.getSearchResults(key, "INDUSTRY_NAME");
+		return searResults;
+
+	}
+
+	@RequestMapping(value = "searchtown/{key}", method = RequestMethod.GET)
+	public @ResponseBody
+	List<Map<String, String>> searchTown(@PathVariable("key") String key) throws Exception {
+
+		key = new String(key.getBytes("ISO-8859-1"), "UTF-8");
+
+		List<Map<String, String>> searResults = luceneSearchService.getSearchResults(key, "TOWN_NAME");
+		return searResults;
+
+	}
+
+	@RequestMapping(value = "searchaddress/{key}", method = RequestMethod.GET)
+	public @ResponseBody
+	List<Map<String, String>> searchAddress(@PathVariable("key") String key) throws Exception {
+
+		key = new String(key.getBytes("ISO-8859-1"), "UTF-8");
+
+		List<Map<String, String>> searResults = luceneSearchService.getSearchResults(key, "ADDRESS");
 		return searResults;
 
 	}

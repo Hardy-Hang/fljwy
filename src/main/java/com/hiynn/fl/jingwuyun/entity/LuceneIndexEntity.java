@@ -23,13 +23,6 @@ public class LuceneIndexEntity {
 	public void setPrimaryKey(String primaryKey) {
 		this.primaryKey = primaryKey;
 	}
-	public String getTableName() {
-		return tableName;
-	}
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
-	private String tableName;
 	/**
 	 * <p>Title: LuceneIndexEntity </p>
 	 * <p>Description: Constructor </p> 
@@ -37,12 +30,11 @@ public class LuceneIndexEntity {
 	 * @param operation
 	 * @param primaryKey 
 	 */
-	public LuceneIndexEntity(int id, String operation, String primaryKey,String tableName) {
+	public LuceneIndexEntity(int id, String operation, String primaryKey) {
 		super();
 		this.id = id;
 		this.operation = operation;
 		this.primaryKey = primaryKey;
-		this.tableName = tableName;
 	}
 	/**
 	 * <p>Title: LuceneIndexEntity </p>

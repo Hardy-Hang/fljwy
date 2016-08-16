@@ -6,7 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.hiynn.fl.jingwuyun.util.PropertiesUtil;
+import com.hiynn.fl.jingwuyun.constants.JdbcConstants;
+
 
 /**
  * <p>Title: JdbcUtil </p>
@@ -22,17 +23,18 @@ import com.hiynn.fl.jingwuyun.util.PropertiesUtil;
  * ============================================
  */
 public class JdbcUtil {
+	private static String URL = JdbcConstants.getURL();
+	private static String driver = JdbcConstants.getDriver();
+	private static String username = JdbcConstants.getUsername();
+	private static String password = JdbcConstants.getPassword();
 	private static Connection conn;
+	private static PreparedStatement ps;
 
 	private JdbcUtil() {
 
 	}
 
 	static {
-		String URL = PropertiesUtil.getJdbcProperty("datasource.jdbcUrl");
-		String driver = PropertiesUtil.getJdbcProperty("datasource.driverClass");
-		String username = PropertiesUtil.getJdbcProperty("datasource.user");
-		String password = PropertiesUtil.getJdbcProperty("datasource.password");
 		try {
 			Class.forName(driver);
 			conn = DriverManager.getConnection(URL, username, password);
@@ -43,10 +45,6 @@ public class JdbcUtil {
 		}
 	}
 
-	public static Connection getConnection() {
-		return conn;
-	}
-
 	/** 
 	 * <p>Title: excuteSql </p>
 	 * <p>Description:  </p>
@@ -54,10 +52,27 @@ public class JdbcUtil {
 	 * @return 
 	 * @throws SQLException 
 	 */
-	public static ResultSet excuteSql(String sql) throws SQLException {
+	public static ResultSet excuteSql(String sql) {
+		ResultSet rs = null;
+		try {
+			
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
 
-		PreparedStatement ps = getConnection().prepareStatement(sql);
-		return ps.executeQuery();
-
+	/** 
+	 * <p>Title: closeConn </p>
+	 * <p>Description:  </p>
+	 */
+	public static void closePs() {
+		try {
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }

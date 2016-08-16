@@ -67,18 +67,6 @@
 		<!--配置事务通知 -->
 		<aop:advisor pointcut-ref="serviceMethod" advice-ref="txAdvice" />
 		<!--对controller配置日志AOP -->
-		<aop:aspect ref="SystemLogAspect">
-			<!-- 1、pointcut="@annotation(com.hiynn.fl.jingwuyun.util.SystemControllerLog)" 
-				表示切入点是注解 2、method 指向的方法，是切面类中的方法，表示当程序触发pointcut指向的注解时，aop会启动method方法 -->
-			<aop:before method="doBefore"
-				pointcut="@annotation(com.hiynn.fl.jingwuyun.util.SystemControllerLog)" />
-			<aop:after-throwing method="doAfterThrowing"
-				pointcut="@annotation(com.hiynn.fl.jingwuyun.util.SystemControllerLog)"
-				throwing="e" />
-			<!-- <aop:after method="doAfterThrowing" pointcut="@annotation(com.hiynn.fl.jingwuyun.util.SystemControllerLog)"/> -->
-			<aop:after method="doAfter"
-				pointcut="@annotation(com.hiynn.fl.jingwuyun.util.SystemControllerLog)"></aop:after>
-		</aop:aspect>
 	</aop:config>
 
 	<bean id="appAroundMethodAdvisorService" class="com.hiynn.fl.jingwuyun.util.HiynnAdvisor">
@@ -87,7 +75,6 @@
 	<bean id="appAroundMethodAdvisorDao" class="com.hiynn.fl.jingwuyun.util.HiynnAdvisor">
 		<property name="daoLogFlag" value="true" />
 	</bean>
-	<bean id="SystemLogAspect" class="com.hiynn.fl.jingwuyun.util.SystemLogAspect"></bean>
 
 	<!-- 为事务通知添加事物处理特性 -->
 	<tx:advice id="txAdvice" transaction-manager="transactionManager">

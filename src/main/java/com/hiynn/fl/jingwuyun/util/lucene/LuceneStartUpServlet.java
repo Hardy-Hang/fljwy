@@ -6,7 +6,8 @@ import javax.servlet.http.HttpServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hiynn.fl.jingwuyun.util.PropertiesUtil;
+import com.hiynn.fl.jingwuyun.constants.LuceneConstants;
+
 
 /**
  * <p>Title: LuceneStartUpServlet </p>
@@ -27,17 +28,17 @@ public class LuceneStartUpServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LoggerFactory.getLogger(LuceneStartUpServlet.class);
-	private LuceneIndexUtil luceneIndexUtil = LuceneIndexUtil.getInstance();
+	private LuceneIndexRefresh indexRef = LuceneIndexRefresh.getInstance();
 
-	private Thread refreshCacheThread = new Thread(new Runnable() { //后台线程刷新索引
+	private Thread refreshCacheThread = new Thread(new Runnable() { // 后台线程刷新索引
 
 				public void run() {
 					while (true) {
 						try {
-							int time = Integer.parseInt(PropertiesUtil.getLuceneProperty("luceneIndex.refreshInterval"));
+							int time = Integer.parseInt(LuceneConstants.getRefreshInterval());
 							Thread.sleep(time);
-							log.debug("begin to refresh Index : " + PropertiesUtil.getLuceneProperty("luceneIndex.path"));
-							luceneIndexUtil.refreshIndex();
+							log.debug("begin to refresh Index : " + LuceneConstants.getIndexPath());
+							indexRef.refreshIndex();
 						} catch (Throwable e) {
 							e.printStackTrace();
 						}
@@ -51,16 +52,16 @@ public class LuceneStartUpServlet extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 		super.init();
-		String initFlag = PropertiesUtil.getLuceneProperty("luceneIndex.initFlag");
+		String initFlag = LuceneConstants.getIsInit();
+		log.info("Lucene Score is limited to " + LuceneConstants.getScoreLimit());
 		if (null != initFlag && initFlag.equals("1")) {
-			log.info("Lucene Score is limited to " + PropertiesUtil.getLuceneProperty("lucene.scoreLimit"));
-			log.info("LuceneIndexPath : " + PropertiesUtil.getLuceneProperty("luceneIndex.path"));
+			log.info("LuceneIndexPath : " + LuceneConstants.getIndexPath());
 			log.info("Initializing Lucene Index , Please wait... ");
 
 			long start = System.currentTimeMillis();
 			try {
-				luceneIndexUtil.clearDBRecords(null);
-				luceneIndexUtil.initIndex();
+				indexRef.clearDBRecords(null);
+				LuceneIndexInit.getInstance().initIndex();
 			} catch (Exception e) {
 				e.printStackTrace();
 				log.error("Initialize Lucene Index failed ,due to " + e.getMessage());
@@ -68,6 +69,6 @@ public class LuceneStartUpServlet extends HttpServlet {
 			log.info("Initialize Lucene Index over ，cost " + (System.currentTimeMillis() - start) + " ms");
 		}
 		refreshCacheThread.setDaemon(true);
-		refreshCacheThread.start(); //启动后台线程
+		refreshCacheThread.start(); // 启动后台线程
 	}
 }

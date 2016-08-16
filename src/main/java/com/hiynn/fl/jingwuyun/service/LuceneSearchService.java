@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.wltea.analyzer.lucene.IKAnalyzer;
 
-import com.hiynn.fl.jingwuyun.util.PropertiesUtil;
+import com.hiynn.fl.jingwuyun.constants.LuceneConstants;
 import com.hiynn.fl.jingwuyun.util.lucene.LuceneIndexUtil;
 
 /**
@@ -38,40 +38,28 @@ import com.hiynn.fl.jingwuyun.util.lucene.LuceneIndexUtil;
 @Service
 public class LuceneSearchService {
 	private static final Logger log = LoggerFactory.getLogger(LuceneSearchService.class);
-	private String indexNames = PropertiesUtil.getLuceneProperty("luceneIndex.initialColumes");
 
-	public List<Map<String, String>> getSearchResults(String key) throws Exception {
+	public List<Map<String, String>> getSearchResults(String key, String index) throws Exception {
 		NRTManager nrtManager = LuceneIndexUtil.getInstance().getNRTManager();
 		IKAnalyzer analyzer = LuceneIndexUtil.getInstance().getAnalyzer();
 		IndexSearcher searcher = nrtManager.acquire();
-		String[] allInds = indexNames.split("/");
-		//取得所有索引名
 		try {
 			BooleanQuery query = new BooleanQuery();
-			for (String inds : allInds) {
-				String[] indexs = inds.split(";");
-				for (String index : indexs) {
-					query.add(new QueryParser(Version.LUCENE_40, index, analyzer).parse(key), BooleanClause.Occur.SHOULD);
-					//在所有索引名中搜索
-				}
-			}
-			float limitScore = Float.parseFloat(PropertiesUtil.getLuceneProperty("lucene.scoreLimit"));
-			//限制返回的匹配分数
+			query.add(new QueryParser(Version.LUCENE_40, index, analyzer).parse(key), BooleanClause.Occur.MUST);
+			float limitScore = Float.parseFloat(LuceneConstants.getScoreLimit());
+			// 限制返回的匹配分数
 			log.info("----------begin to search : [ " + key + " ]----------");
 			TopDocs tds = searcher.search(query, 20);
 			log.info("----------found " + tds.scoreDocs.length + " hits ， and meet score records as:");
-			
+
 			List<Map<String, String>> docs = new ArrayList<Map<String, String>>();
 			int i = 0;
 			for (ScoreDoc sd : tds.scoreDocs) {
 				Document doc = searcher.doc(sd.doc);
 				Map<String, String> map = new HashMap<String, String>();
-				for (String inds : allInds) {
-					String[] indexs = inds.split(";");
-					for (String index : indexs) {
-						map.put(index, doc.get(index));
-					}
-				}
+				map.put("INDUSTRY_NAME", doc.get("INDUSTRY_NAME"));
+				map.put("TOWN_NAME", doc.get("TOWN_NAME"));
+				map.put("ADDRESS", doc.get("ADDRESS"));
 				if (sd.score >= limitScore) {
 					docs.add(map);
 					log.info((i + 1) + ". " + map + " \t " + sd.score);

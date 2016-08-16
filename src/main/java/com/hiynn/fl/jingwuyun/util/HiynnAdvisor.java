@@ -31,7 +31,7 @@ public class HiynnAdvisor implements MethodInterceptor {
 			.getLogger(HiynnAdvisor.class);
 	
 	@SuppressWarnings("rawtypes")
-	//@Override
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		String flag = getMethodString(invocation);
 		long start = System.currentTimeMillis();
